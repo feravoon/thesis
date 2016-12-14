@@ -1,0 +1,83 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[%
+    left=1in,%
+    right=1in,%
+    top=1.0in,%
+    bottom=1.0in,%
+    paperheight=297mm,%
+    paperwidth=210mm%
+]{geometry}%
+\setlength{\parskip}{\baselineskip}%
+\setlength{\parindent}{0pt}%
+
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+
+\title{Mean-Shift Tracking}
+\author{Ahmet Çakıroğlu}
+\date{}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+
+\begin{document}
+
+\maketitle
+
+
+%\begin{equation}
+%\hat{X}_{k} = K_{k}.Z_{k}+(1-K_{k}).\hat{X}_{k-1}
+%\end{equation}
+Mean-shift is a kernel based object tracking algorithm. Mean-shift uses weighted histogram of the target region as the kernel. Object is localized by histogram similarities between the kernel and the object region in the new frame. Instead of searching the most similar histogram exhaustively, kernel window moves from the previous location to the new location of the object by a mean-shift procedure. Mean-shift employs Bhattacharyya coefficient to define a distance metric between two histograms. Bhattacharyya coefficient has the following form in terms of densities:
+\begin{gather}
+\rho(\boldsymbol{y})\equiv\rho[p(\boldsymbol{y}),q]=\int\sqrt{p_{\boldsymbol{z}}(\boldsymbol{y})q_{\boldsymbol{z}}}d\boldsymbol{z}
+\end{gather}
+Since Mean-shift uses weighted histograms as density estimates, Bhattacharyya coefficient takes the following form:
+\begin{gather}
+\hat{\rho}(\boldsymbol{y})\equiv\rho[\hat{\textbf{p}}(\boldsymbol{y}),\hat{\textbf{q}}]=\sum_{u=1}^m\sqrt{\hat{p}_{u}(\boldsymbol{y})\hat{q}_{u}}
+\end{gather}
+where $\hat{q}_{u}$ is the target histogram, $\hat{p}_{u}(\boldsymbol{y})$ is the histogram of the region centered at discrete pixel location $\textbf{y}$ and $m$ is the number of histogram bins. Based on Bhattacharyya coefficient, a distance metric between two histograms is defined:
+\begin{gather}
+d(\boldsymbol{y}) = \sqrt{1-\rho[\hat{\textbf{p}}(\boldsymbol{y}),\hat{\textbf{q}}]}
+\end{gather}
+
+\subsection*{Weighted histogram computation}
+Pixel locations of the region centered around $\boldsymbol{y}$ are denoted by $\{{\boldsymbol{x}_i}\}_{i=1...n}$. Let $b:B^2\rightarrow \{1...m\}$ be a function which maps $\boldsymbol{x}_i$ to the index $b(\boldsymbol{x}_i)$ of the histogram bin corresponding to intensity value at the pixel location $\boldsymbol{x}_i$. The weighted histogram can be written as
+\begin{gather}
+\hat{q}_{u} = C \sum_{i=1}^n k\bigg{(}\bigg{\|}\frac{\boldsymbol{y}-\boldsymbol{x}_i}{h}\bigg{\|}^2\bigg{)}\delta[b(\boldsymbol{x}_i)-u]
+\end{gather}
+where $C$ is a normalization constant, $h$ is the scale of the region, $\delta$ is the Kronecker delta function, $k:[0,\infty)\rightarrow R$ is a function which assigns smaller weights to the pixel locations farther away from the center.
+
+\subsection*{Distance Minimization}
+Search procedure to find the new location $y$ of the target starts from the location $\boldsymbol{y}_0$ of the target in the previous frame. Minimization of the distance metric is equivalent to maximization of Bhattacharyya coefficient. Taylor expansion of $\rho[p(\boldsymbol{y}),q]$ yields:
+\begin{gather}
+\rho[p(\boldsymbol{y}),q] \approx \frac{1}{2}\sum_{u=1}^m\sqrt{\hat{p}_{u}(\boldsymbol{y}_0)\hat{q}_{u}} + \frac{1}{2}\sum_{u=1}^m \hat{p}_{u}(\boldsymbol{y}) \sqrt{\frac{\hat{q}_{u}}{\hat{p}_{u}(\boldsymbol{y}_0)}}
+\end{gather}
+Since first term is independent of $y$, second term has to be maximized. Introducing (4) to second term, we get
+\begin{gather}
+\rho[p(\boldsymbol{y}),q] \approx \frac{1}{2}\sum_{u=1}^m\sqrt{\hat{p}_{u}(\boldsymbol{y}_0)\hat{q}_{u}} + \frac{C}{2} \sum_{u=1}^{n_h} w_i k\bigg{(}\bigg{\|}\frac{\boldsymbol{y}-\boldsymbol{x}_i}{h}\bigg{\|}^2\bigg{)}
+\end{gather}
+where
+\begin{gather}
+w_i = \sum_{i=1}^m \delta[b(\boldsymbol{x}_i)-u] \sqrt{\frac{\hat{q}_{u}}{\hat{p}_{u}(\boldsymbol{y}_0)}}
+\end{gather}
+
+Maximization is achieved by Mean-shift procedure. Given the distribution $\hat{q}_{u}$  and the previous location $y_0$ of the target: 
+\begin{enumerate}
+\item Compute the weights $\{w_i\}_{i=1...n_h}$ according to (7).
+\item Calculate the new location of the target
+\begin{gather}
+\boldsymbol{y}_1 = \frac{\sum_{i=1}^{n_h} \boldsymbol{x}_i w_i g\big{(}\big{\|}\frac{\boldsymbol{y}_0-\boldsymbol{x}_i}{h}\big{\|}^2\big{)}}{\sum_{i=1}^{n_h} w_i g\big{(}\big{\|}\frac{\boldsymbol{y}_0-\boldsymbol{x}_i}{h}\big{\|}^2\big{)}}
+\end{gather}
+\item If $\|\boldsymbol{y}_1-\boldsymbol{y}_0\|<\epsilon$ ~~~~ Stop.\\
+Otherwise ~~~~~~~~~~~~ Set $\boldsymbol{y}_0 \leftarrow \boldsymbol{y}_1$ and go to Step 1.
+\end{enumerate}
+
+
+\end{document}

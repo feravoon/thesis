@@ -1,0 +1,66 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[%
+    left=1in,%
+    right=1in,%
+    top=1.0in,%
+    bottom=1.0in,%
+    paperheight=297mm,%
+    paperwidth=210mm%
+]{geometry}%
+\setlength{\parskip}{\baselineskip}%
+\setlength{\parindent}{0pt}%
+
+\title{Kalman Filter}
+\author{Ahmet Çakıroğlu}
+\date{}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+
+\begin{document}
+
+\maketitle
+
+
+%\begin{equation}
+%\hat{X}_{k} = K_{k}.Z_{k}+(1-K_{k}).\hat{X}_{k-1}
+%\end{equation}
+Kalman filter is an estimator which estimates the state of a linear system. It uses measurements that are generated as a linear function of the system state but corrupted by additive Gaussian noise. Kalman filter employs two procedures called time update(prediction) and measurement update(correction). Let $x_k$ be the state of the system at time step $k$, then state transition at each time step can be written as a linear combination of the previous state, a control signal and noise:
+\begin{equation}
+x_k = Ax_{k-1}+Bu_k+w_{k}
+\end{equation}
+where $A$ is a matrix called state transition matrix, $u_k$ is a control signal assuming the system is controlled by another system, $B$ is a matrix representing the control model and $w_k$ is the process noise. Measurements from the system can be modelled as a linear transform of the state with additive Gaussian noise:
+\begin{equation}
+z_k = Hx_k+v_k
+\end{equation}
+where $z_k$ is the measurement, $H$ is the measurement model and $v_k$ is the measurement noise. $A$, $B$ and $H$ matrices of the system are constant and must be known or correctly modelled for Kalman filter to work correctly.
+\subsection*{Time Update (Prediction)}
+Kalman filter makes a prediction about the state of the system in next iteration. The prediction is simply made by using the state transition model:
+\begin{equation}
+\hat{x}_{k}^{-} = A\hat{x}_{k-1}+Bu_{k}
+\end{equation}
+where $\hat{x}_{k}^{-}$ is the state prediction or the state prior. Since it is an estimator, Kalman filter has a state estimation covariance matrix denoted as $P_k$. Prediction step also makes a prediction about what estimation covariance will be at next iteration, in other words it projects ahead the error covariance for one step:
+\begin{equation}
+P_{k}^{-} = AP_{k-1}A^{T}+Q
+\end{equation}
+where $Q$ is the covariance matrix of the process noise $w_k$.
+
+\subsection*{Measurement Update (Correction)}
+In correction equations, new measurement about the system is used to update previously predicted state estimate. Firstly, Kalman gain, denoted as $K_k$ is calculated. Kalman gain is a weighting factor that determines how much the new measurement affects the new estimate of the state. Kalman gain is calculated by using the state estimation covariance matrix $P_k$ and measurement covariance matrix $R$:
+\begin{equation}
+K_{k} = P^{-}_{k}H^{T}(HP^{-}_{k}H^{T}+R)^{-1}
+\end{equation}
+Note that $R$ is a constant user defined value, so one must correctly define how noisy the measurements would be. State prediction is updated with a value called the measurement prediction error or the residual.
+\begin{equation}
+\hat{x}_{k} = \hat{x}_{k}^{-} + K_{k}(z_{k}-H\hat{x}_{k}^{-})
+\end{equation}
+$H\hat{x}_{k}^{-}$ is what would the measurement be if the state prediction is correct. Therefore $(z_{k}-H\hat{x}_{k}^{-})$ is the difference between the measurement $z_k$ and predicted measurement $H\hat{x}_{k}^{-}$, so it is the measurement residual. State estimate is corrected by the measurement residual weighted by Kalman gain. Correction step also corrects the state estimation covariance prediction $P_k^{-}$ using calculated Kalman gain:
+\begin{equation}
+P_{k} = (I-K_{k}H)P^{-}_{k}
+\end{equation}
+
+Prediction and correction procedures run at every iteration respectively. Outputs of every iteration are used for inputs to next iteration.
+\bibliographystyle{unsrt}
+\bibliography{references}
+\end{document}

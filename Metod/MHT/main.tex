@@ -1,0 +1,63 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+
+\usepackage[%
+    left=1in,%
+    right=1in,%
+    top=1.0in,%
+    bottom=1.0in,%
+    paperheight=297mm,%
+    paperwidth=210mm%
+]{geometry}%
+\setlength{\parskip}{\baselineskip}%
+\setlength{\parindent}{0pt}%
+
+\newcommand{\btheta}{\boldsymbol{\theta}}
+
+
+\title{Multiple Hypothesis Filter}
+\author{Ahmet Çakıroğlu}
+\date{}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+
+\begin{document}
+
+\maketitle
+
+Multiple hypothesis filter is an algorithm to resolve measurement-to-track association problem in multi-target tracking systems. Unlike joint probabilistic data association filter (JPDAF) which only considers latest set of measurements and already established tracks; multiple hypothesis filter generates and holds hypotheses about all possible association decisions from the beginning, including initiation of a new track. In each iteration, association decision is chosen as the hypothesis with the highest probability while other hypotheses are retained and improved. This prevents an incorrect association to cause a complete mix up of tracks.
+
+Let $\boldsymbol{\Omega}^k$ be the set of all association hypotheses up to time step $k$. $\boldsymbol{\Omega}^k$ consists of joint cumulative events. A joint cumulative event $\Theta^{k,l}$ at time step $k$ can be defines as follows
+\begin{gather}
+\Theta^{k,l} = \{ \Theta^{k-1,s}, \btheta(k) \}
+\end{gather}
+where $\btheta(k)$ is a joint event in time k which consists of $\tau$ number of measurements originated from an existing track, $v$ number of measurements originated from new targets and $\phi$ number of measurements that are false alarms. Following indicators are defined for latest set of measurements $\boldsymbol{z}_i(k)$, $i=1...m_k$
+\begin{align}
+\tau_i = \tau_i[\btheta(k)] \triangleq & \begin{cases}
+    1, & \text{if $\boldsymbol{z}_i(k)$ originated from an existing track}\\
+    0, & \text{otherwise}\\
+  \end{cases}\\ \notag\\
+v_i = v_i[\btheta(k)] \triangleq & \begin{cases}
+    1, & \text{if $\boldsymbol{z}_i(k)$ originated from a new target}\\
+    0, & \text{otherwise}\\
+  \end{cases}\\ \notag\\
+  \delta_t = \delta_t[\btheta(k)] \triangleq & \begin{cases}
+    1, & \text{if track $t$ is detected at time step $k$}\\
+    0, & \text{otherwise}\\
+  \end{cases}
+\end{align}
+Joint cumulative events in $\boldsymbol{\Omega}^{k-1}$ is augmented with feasible joint association events in time srep $k$ to create $\boldsymbol{\Omega}^k$. Conditional probability of each cumulative event is calculated as follows
+\begin{gather}
+P\{\Theta^{k,l}|Z^k\} = \frac{1}{c} \frac{\phi!v!}{m_k V^{\phi v}} \mu_F(\phi) \mu_N(v) \prod_{i=1}^{m_k}\Big[N_{t_i}[\bold{z}_i(k)]\Big]^{\tau_i} \prod_{t=1}^T (P^t_D)^{\delta_t}(1-P^t_D)^{1-\delta_t} P\{\Theta^{k-1,s}|Z^{k-1}\}
+\end{gather}
+where $Z^k$ is the set of all measurements up to time step $k$, $\bold{z}_i(k)$ is an individual measurement, $c$ is a normalization constant, $V$ is the surveillance region volume, $N_{t_j}$ is the multivariate normal distribution function generated with the covariance matrix produced by the state estimator of target $t_i$. $P^t_D$ is the probability of detection of target $t$. $\mu_F(\phi)$ and  $\mu_N(v)$ are the probability mass functions of number of false alarms and number of new targets. After calculating the probabilities of all joint cumulative events in $\boldsymbol{\Omega}^k$, MHF chooses joint cumulative event with the highest probability as the association decision.
+
+Number of hypotheses grow exponentially as new measurements arrive. MHT performs hypothesis reduction techniques to keep the number of hypotheses at a reasonable level. Hypotheses with negligible probabilities are eliminated and hypotheses which have similar associations are merged.+-
+\bibliographystyle{unsrt}
+\bibliography{references}
+\end{document}

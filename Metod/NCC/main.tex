@@ -1,0 +1,46 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[%
+    left=1in,%
+    right=1in,%
+    top=1.0in,%
+    bottom=1.0in,%
+    paperheight=297mm,%
+    paperwidth=210mm%
+]{geometry}%
+\setlength{\parskip}{\baselineskip}%
+\setlength{\parindent}{0pt}%
+
+
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+
+\title{Normalized Cross-Correlation Tracking}
+\author{Ahmet Çakıroğlu}
+\date{}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+
+\begin{document}
+
+\maketitle
+Normalized Cross-Correlation (NCC) Tracking is a template matching based tracking algorithm which uses NCC to find the closes match to template in the new frame. NCC differs from standard correlation operation by preprocessing the inputs to have zero mean and unit variance. NCC operation between two images that have the same size defined as follows:
+\begin{gather}
+\mathcal{N}_\times(\boldsymbol{A},\boldsymbol{B}) = \frac{\sum_i (\boldsymbol{A}(p_i)-\bar{\boldsymbol{A}})(\boldsymbol{B}(p_i)-\bar{\boldsymbol{B}})}{\sqrt{\sum_i(\boldsymbol{A}(p_i)-\bar{\boldsymbol{A}})^2}\sqrt{\sum_i(\boldsymbol{B}(p_i)-\bar{\boldsymbol{B}})^2}}
+\end{gather} 
+
+NCC operation is performed on the whole image by moving the template window over the image. Since it is necessary to calculate the mean and variance of every region which template moves over, NCC is a costly operation to perform. In order to address this problem, \cite{lewis1995fast} employs integral images to calculate NCC by Fast Fourier Transform.
+
+After the NCC matching operation and finding the maximum of the result, region around the newly found target location is blended with the template to generate the new filter for the next image.
+\begin{gather}
+T_{k+1} = \alpha I(\boldsymbol{x}) + (1-\alpha)T_k
+\end{gather} 
+where $T$ is template, $k$ is time step, $x$ is the detected target location and $\alpha$ is the blending ratio.
+
+\bibliographystyle{unsrt}
+\bibliography{references}
+
+\end{document}

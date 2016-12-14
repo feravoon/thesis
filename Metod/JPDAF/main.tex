@@ -1,0 +1,73 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+
+\usepackage[%
+    left=1in,%
+    right=1in,%
+    top=1.0in,%
+    bottom=1.0in,%
+    paperheight=297mm,%
+    paperwidth=210mm%
+]{geometry}%
+\setlength{\parskip}{\baselineskip}%
+\setlength{\parindent}{0pt}%
+
+\newcommand{\btheta}{\boldsymbol{\theta}}
+
+
+\title{Joint Probabilistic Data Association Filter}
+\author{Ahmet Çakıroğlu}
+\date{}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+
+\begin{document}
+
+\maketitle
+In a small target tracking system, Joint Probabilistic Data Association Filter (JPDAF) is an algorithm that matches measurements to existing target tracks. Following the measurements, JPDAF calculates the probabilities of all possible joint measurement-to-track associations. A joint association is a decision representing a joint event, which consists of all measurement events in a time step. JPDAF defines a joint event with following:
+\begin{equation}
+\btheta=\bigcap_{j=1}^{m_k}{\theta{jt_j}}
+\end{equation}
+where
+\begin{gather}\nonumber
+{\theta{jt}}\triangleq \text{\{measurement $j$ originated from target $t$\},}\\
+j=1,...,m_k;~~~~~t=0,1,...,T
+\end{gather}
+$T$ is the number of targets being tracked and $m_k$ is the number of measurements in time step $k$ (latest time step). Instead of considering all joint events, JPDAF uses a validation matrix to eliminate associations with negligible probability in order to reduce computational complexity. If a measurement $j$ is outside of the validation gate of target $t$, association probability of the event $\theta_{jt}$ is considered negligible. JPDAF defines a validation matrix as follows:
+\begin{gather}
+\boldsymbol{\Omega}\triangleq[\omega_{jt}],~~~~~~j=1,...,m_k;~~~~~t=0,1,...,T
+\end{gather}
+where $\omega_{jt}$ is a binary value that indicates if measurement $j$ is in the validation gate of target $t$. Validation matrix is used for generating different joint event permutations. A joint event $\btheta$ is represented in the matrix form similar to validation matrix. 
+\begin{gather}
+\hat{\boldsymbol{\Omega}}(\btheta)=[\hat{\omega}_{jt}(\btheta)]
+\end{gather}
+$\hat{\omega}_{jt}(\btheta)$ is 1 if $\theta_{jt}$ is an association event in $\btheta$. $\hat{\boldsymbol{\Omega}}(\btheta)$ has one extra column for representing false alarms (i.e., measurements which are not originated from a target).
+A joint event is called \textit{feasible} if a measurement can only be originated from one source, i.e.,
+\begin{gather}
+\sum_{t=0}^{T}\hat{\omega}_{jt}(\btheta)=1,~~~~~~j=1,...,m_k
+\end{gather}
+and no more than one measurement can originate from a target, i.e.,
+\begin{gather}
+\delta_t(\btheta)\triangleq\sum_{j=1}^{m_k}\hat{\omega}_{jt}(\btheta)\leq1,~~~~~~t=1,...,T
+\end{gather}
+$\delta_t(\btheta)$ is called \textit{target detection indicator}. It indicates that target $t$ is associated with a measurement in the joint event $\btheta$. For the convenience of the main equation of JPDAF, a binary \textit{measurement association indicator} $\tau_j(\btheta)$ is also defined. It indicates that measurement $j$ is associated with a target.
+\begin{gather}
+\tau_j(\btheta)\triangleq\sum_{t=1}^{T}\hat{\omega}_{jt}(\btheta),~~~~~~j=1,...,m_k
+\end{gather}
+Using $\tau_j(\btheta)$, number of unassociated measurements can be calculated:
+\begin{gather}
+\phi(\btheta)=\sum_{j=1}^{m_k}[1-\tau_j(\btheta)]
+\end{gather}
+JPDAF calculates the probability of a feasible joint event with as follows:
+\begin{gather}
+P\{\btheta|Z\}=\frac{1}{c} \dfrac{\phi!}{V^\phi} \prod_{j=1}^{m_k}\Big[N_{t_j}[\bold{z}_j]\Big]^{\tau_j} \prod_{t=1}^T (P^t_D)^{\delta_t}(1-P^t_D)^{1-\delta_t}
+\end{gather}
+where $Z$ is the measurement set, $\bold{z}_j$ is an individual measurement, $c$ is a normalization constant, $V$ is the surveillance region volume, $N_{t_j}$ is the multivariate normal distribution function generated with the covariance matrix produced by the state estimator of target $t_j$. $P^t_D$ is the probability of detection of target $t$. After calculating the probabilities of every feasible joint event, the feasible joint event with the highest probability is chosen as the association decision.
+\bibliographystyle{unsrt}
+\bibliography{references}
+\end{document}

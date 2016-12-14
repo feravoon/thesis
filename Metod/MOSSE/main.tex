@@ -1,0 +1,51 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+
+\usepackage[%
+    left=1in,%
+    right=1in,%
+    top=1.0in,%
+    bottom=1.0in,%
+    paperheight=297mm,%
+    paperwidth=210mm%
+]{geometry}%
+\setlength{\parskip}{\baselineskip}%
+\setlength{\parindent}{0pt}%
+
+\newcommand{\btheta}{\boldsymbol{\theta}}
+
+
+\title{Minimum Output Sum of Squared Error Filter}
+\author{Ahmet Çakıroğlu}
+\date{}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+
+\begin{document}
+
+\maketitle
+Minimum Output Sum of Squared Error (MOSSE) Filter is a template based, adaptive correlation filter for tracking objects in images. Correlation operation in the Fourier domain can be written as follows:
+\begin{gather}
+G=F\odot H^*
+\end{gather}
+where $F$ is the current frame image and $H$ is the filter. MOSSE defines a desired correlation output which is a strong peak at the centroid location of the object being tracked. In order to find a filter that produces desired correlation output, MOSSE minimizes the distance between the actual correlation output and the desired correlation output.
+\begin{gather}
+\min_{H^*}|F\odot H^* - G|
+\end{gather}
+A closed form expression for the MOSSE filter is derived by solving for $H^*$:
+\begin{gather}
+H^* = \frac{G \odot F^*}{F \odot F^*}
+\end{gather}
+A filter calculated with this approach fits exactly to current frame but will often fail for locating the object in the next frame. To make the filter more general, an averaging approach is used. MOSSE filter found in the current frame is averaged with the previous averaged filter as follows:
+\begin{gather}
+\nonumber
+A_i = \eta G_i \odot F_i^* + (1-\eta) A_{i-1}\\ \nonumber
+B_i = \eta F_i \odot F_i^* + (1-\eta) B_{i-1}\\
+H_i^* = \frac{A_i}{B_i}
+\end{gather}
+\end{document}
